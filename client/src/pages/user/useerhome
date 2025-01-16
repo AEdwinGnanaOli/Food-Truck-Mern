@@ -1,0 +1,117 @@
+{/* <div>
+   
+        <div className="user-data">
+          {submitSuccess && (
+            <div className="user-profile-container">
+              <div className="users-profile">
+                {datavalue.map((user) => (
+                  <div className="user-profile">
+                    <div
+                      className="user-profile-name"
+                      style={{ background: color }}
+                    >
+                      <div className="user-first-letter">{user.name[0]}</div>
+                    </div>
+                    <ul className="user-profile-details">
+                      <li>{user.name}</li>
+                      <li>{user.email}</li>
+                      <li>{user.phone}</li>
+                    </ul>
+                    <div className="btns d-flex justify-content-between p-2">
+                      <Button
+                        className="edit-btn button-update"
+                        variant="success"
+                        onClick={(e) => handleUserUpdate(user._id)}
+                      >
+                        <i>
+                          <MdModeEdit className="edit-icon" />
+                        </i>
+                        <i>Edit</i>
+                      </Button>
+                      <Button
+                        className="edit-btn button-update"
+                        variant="success"
+                        onClick={(e) => handleUserDelete(user._id)}
+                      >
+                        <i>
+                          <MdDelete className="edit-icon" />
+                        </i>
+                        <i>Delete</i>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  variant=""
+                  className="button-close"
+                  onClick={() => setsubmitSuccess(false)}
+                >
+                  <IoClose />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+     
+        <section id="card">
+          {items.map((vendor) => (
+            <Card
+              style={{
+                width: 300
+                // display:'flex'
+              }}
+              key={vendor._id}
+              cover={
+                <img
+                  alt="example"
+                  src={`${vendor.menuImage}`}
+                  style={{ height: "300px" }}
+                />
+              }
+              actions={[
+                <div
+                  onClick={() => handleClicks(vendor._id)}
+                  className="like-header"
+                >
+                  {liked ? (
+                    <CiHeart className="unlike" />
+                  ) : (
+                    <FcLike className="like" />
+                  )}
+                  <p>
+                    {vendor.likeCount}
+                    {vendor.likeCount === 1 ? "like" : "likes"}
+                  </p>
+                </div>,
+                <span
+                  onClick={(e) =>
+                    navigate(
+                      `/productfulldetail/${vendor._id}/${cookies.token}`
+                    )
+                  }
+                >
+                  more
+                </span>
+              ]}
+            >
+              <Meta
+                avatar={
+                  <Avatar
+                    src={`${vendor.shopImage}`}
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      borderRadius: "50%"
+                    }}
+                  />
+                }
+                title={shopName}
+                description={vendor.address}
+                style={{ overflow: "visible" }}
+              />
+            </Card>
+          ))}
+        </section>
+
+      </div> */}
+      

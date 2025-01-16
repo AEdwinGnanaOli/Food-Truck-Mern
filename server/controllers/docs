@@ -1,0 +1,138 @@
+
+module.exports.ProductFullDetails = async (req, res) => {
+    try {
+        const { id, token } = req.params
+        if (!token) {
+            return res.json({ message: "not token" })
+        }
+        jwt.verify(token, "jwt_secret_key", async (err, dcoded) => {
+            if (err) {
+                return res.json({ message: 'token missing' })
+            } else {
+                const vendorProductDetails = await ProductModel.findOne({ _id: id })
+                if (vendorProductDetails) {
+                    return res.json({ message: 'Product Find Successfully', vendorProductDetails })
+                } else {
+                    return res.json({ message: 'User not Found' })
+                }
+            }
+        })
+
+    } catch (err) {
+        console.log(err)
+    }
+
+}
+
+module.exports.getProductsDetails=async(req,res)=>{
+    try {
+        const{id}=req.params
+        const pdls= await  ProductModel.findById({_id:id})
+        res.json({ message: 'Product Details Found Successfully',pdls })
+       
+    }catch(err){
+        console.log(err)
+    }
+}
+module.exports.ProductUpdate = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { shopname, email, shopmobilenumber, shopaddress, starttime, endtime,} = req.body
+        const product = await ProductModel.findByIdAndUpdate({ _id: id }, { shopname: shopname, email: email, shopmobilenumber: shopmobilenumber, shopaddress: shopaddress, starttime: starttime, endtime: endtime, shopImage: req.files.file1[0].filename,menuImage:req.files.file2[0].filename,})
+        const vendorEmailUpdate = await Vendormodel.findByIdAndUpdate({ _id: product.ProductId }, { email: email })
+        
+        if (product) { res.status(200).json({ message: 'Product update Successfully', product,vendorEmailUpdate }) }
+        else { return res.json({ message: 'not found' }) }
+      
+    } catch (err) {
+        console.log(err)
+    }
+
+}
+module.exports.ProductDelete = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const productDelete = await ProductModel.findByIdAndDelete({ _id: id })
+        res.json({ message: 'Product Delete Successfully', productDelete })
+       
+    } catch (err) {
+        res.json(err)
+    }
+}
+
+module.exports.getUserAndVendorDtails=async(req,res)=>{
+    try {
+        const{id}=req.params
+        const udls = await UserModel.findById({ _id: id })
+        const vdls= await  Vendormodel.findById({_id:id})
+        res.json({ message: 'Product Details Found Successfully',udls,vdls })
+        
+    }catch(err){
+        console.log(err)
+    }
+}
+module.exports.userUpdate = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { name, email, phone, } = req.body
+        const details = await UserModel.findByIdAndUpdate({ _id: id }, { name: name, email: email, phone: phone })
+        if (details) { res.status(200).json({ message: 'Details Update Successfully', details }) }
+        else { return res.json({ message: 'not found' }) }
+      
+    } catch (err) {
+        console.log(err)
+    }
+
+}
+module.exports.vendorUpdate = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { name, email, phone, } = req.body
+        const details = await UserModel.findByIdAndUpdate({ _id: id }, { name: name, email: email, phone: phone })
+        const productDetails = await ProductModel.updateMany({ ProductId: id }, { email: email })
+        if (details) { res.status(200).json({ message: 'Details Update Successfully', details, productDetails }) }
+        else { return res.json({ message: 'not found' }) }
+        
+    } catch (err) {
+        console.log(err)
+    }
+
+}
+
+module.exports.Products = async (req, res) => {
+    try {
+        const items = await ProductModel.find()
+        res.json({ message: 'Product Find Successfully', items })
+    } catch (err) {
+        res.json(err)
+    }
+}
+module.exports.VendorSignUp = async (req, res,) => {
+    try {
+        const { name, email, phone, password, role } = req.body;
+        const existingUser = await Vendormodel.findOne({ email })
+        if (existingUser) {
+            return res.json({ message: "User already existed" })
+        }
+        const vendor = await Vendormodel.create({ name, email, password, phone, role });
+        const token = createSceretToken(vendor._id);
+        res.cookie('token', token);
+        res.json({ message: "User Sign Successfully", Status: 'Success', vendor });
+        next()
+    } catch (err) {
+        console.log(err)
+    }
+}
+module.exports.ProductRegister = async (req, res,) => {
+    try {
+        const { vendorId } = req.params
+        console.log(vendorId)
+        const { shopname, email, shopmobilenumber, shopaddress, starttime, endtime, role } = req.body
+        const product = await ProductModel.create({ ProductId: vendorId, shopname, email, shopmobilenumber, shopaddress, starttime, endtime, shopImage: req.files.file1[0].filename,menuImage:req.files.file2[0].filename, role })
+        console.log(product)
+        res.json({ message: 'Product Signup Successfully', Status: 'Success', product })
+        next()
+    } catch (err) {
+        console.log(err)
+    }
+}

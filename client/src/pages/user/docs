@@ -1,0 +1,84 @@
+  useEffect(() => {
+    const verifyCookies = async () => {
+      if (!cookies.token) {
+        navigate("/login");
+      }
+      const { data } = await axios.post(
+        "https://foot-trucks-react-js.onrender.com",
+        {},
+        { withCredentials: true }
+      );
+      const { status } = data;
+      setuserId(data.user._id);
+      setValueData([data.user]);
+      if (!status) {
+        removeCookie("token");
+        navigate("/login");
+      } else {
+        toast(`Hello`, { position: "top-right" });
+      }
+    };
+    verifyCookies();
+  }, [cookies, navigate, removeCookie]);
+
+  useEffect(() => {
+    axios.get("https://foot-trucks-react-js.onrender.com/items").then((response) => {
+      setItems(response.data.items);
+    });
+    axios
+      .get(`https://foot-trucks-react-js.onrender.com/user-likes/${userId}`)
+      .then((response) => {
+        const likedItemIds = response.data.details.map((like) => like.vendorId);
+        setLikedItems(likedItemIds);
+      });
+  }, [userId]);
+
+  const handleClicks = (vendorId) => {
+    axios
+      .post(
+        `https://foot-trucks-react-js.onrender.com/like/${userId}/${vendorId}`
+      )
+      .then((res) => {
+        setLiked(!liked);
+        setLikeCount(res.data.likeCount);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const handleUserUpdate = (id) => {
+    sessionStorage.setItem("uupdateid", id);
+    navigate("/user/update");
+  };
+
+  const handleUserDelete = (id) => {
+    axios
+      .delete(`https://foot-trucks-react-js.onrender.com/user/delete/${id}`)
+      .then(() => {
+        window.location.reload();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+
+
+  <div className="flex gap-2 justify-center align-middle flex-wrap">
+  {items.map((vendor) => (
+    <Card
+      key={vendor._id}
+      id={vendor._id}
+      shopImage={vendor.shopImage}
+      menuImage={vendor.menuImage}
+      shopName={vendor.shopName}
+      address={vendor.address}
+      description={vendor.description}
+      navigate={navigate}
+      token={cookies.token}
+      // price={vendor.price}
+    />
+  ))}
+
+</div>
