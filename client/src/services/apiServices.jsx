@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8800";
+const BASE_URL = "https://food-truck-mern.onrender.com";
 // Global Axios configuration
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = BASE_URL; // Optionally set globally
