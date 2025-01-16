@@ -1,5 +1,5 @@
 import LoginDetails from "../models/loginDetailsModel.js";
-import productModel from "../models/ProductModel.js";
+import productModel from "../models/productModel.js";
 import userModel from "../models/UserModel.js";
 import { handleError } from "../utils/errorHandler.js";
 const getAllUser = async (req, res) => {
