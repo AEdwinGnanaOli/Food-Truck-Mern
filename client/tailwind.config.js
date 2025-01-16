@@ -1,6 +1,6 @@
 import plugin from "tailwindcss/plugin";
 import forms from '@tailwindcss/forms';
-const withMT = require("@material-tailwind/react/utils/withMT");
+//const withMT = require("@material-tailwind/react/utils/withMT");
 export default {
   content: [
     './index.html',
@@ -157,6 +157,6 @@ export default {
         modifySelectors(({ className }) => `.sidebar-expanded .${e(`sidebar-expanded${separator}${className}`)}`);
       });
     }),
-    require('@tailwindcss/forms'),
+    //require('@tailwindcss/forms'),
   ],
 };
