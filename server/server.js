@@ -23,7 +23,7 @@ const { MONGO_URL, PORT } = process.env;
 const allowedOrigins = [
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://your-production-domain.com",
+    "https://effortless-hamster-fd2008.netlify.app",
 ];
 
 app.use(
