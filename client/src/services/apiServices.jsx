@@ -1,36 +1,56 @@
 import axios from "axios";
 
-const BASE_URL = "https://food-truck-mern.onrender.com";
-// Global Axios configuration
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = BASE_URL; // Optionally set globally
+// Define BASE URLs for different environments
+const BASE_URLS = {
+  development: "http://localhost:8800",
+  production: "https://food-truck-mern.onrender.com"
+};
 
+// Automatically pick the base URL based on the current environment
+const BASE_URL =
+  "not" === "production" ? BASE_URLS.production : BASE_URLS.development;
+
+// Global Axios configuration
+axios.defaults.withCredentials = true; // Always include credentials (cookies) in requests
+axios.defaults.baseURL = BASE_URL; // Set base URL globally
+
+// Function to make API requests
+// apiService.jsx
 const makeRequest = async (
   endPoint = "/",
   method = "GET",
   data = null,
-  config = {}
+  config = {},
+  token = null
 ) => {
-  axios.defaults.withCredentials = true;
   try {
+    const headers = {
+      ...config.headers,
+      Authorization: token ? `Bearer ${token}` : ""
+    };
+
     const response = await axios({
       url: endPoint,
       method,
-      baseURL: BASE_URL,
       data,
-      timeout: 60000 * 2, // Timeout in milliseconds (10 seconds)
-      ...config, // Allows custom configurations like headers
-      withCredentials: true
+      timeout: 120000,
+      headers,
+      ...config
     });
-    
+
+    console.log("Response:", response.data);
     return response.data;
   } catch (error) {
-    // Normalize and log error message
     const errorMessage =
-      error.response?.data || error.message || "Unknown error occurred";
+      error.response?.data?.message ||
+      error.response?.data ||
+      error.message ||
+      "Unknown error occurred";
     console.error("API Error:", errorMessage);
-    throw new Error(errorMessage); // Throw normalized error
+    throw new Error(errorMessage);
   }
 };
 
 export { makeRequest };
+
+

@@ -2,14 +2,19 @@ import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { makeRequest } from "../../services/apiServices";
+import { useSelector } from "react-redux";
 
 function More() {
   const { id } = useParams();
-
+const {userInfo} =useSelector((state)=>state.user)
   // Fetch product details using React Query
   const { data: product, isLoading, isError, error } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => makeRequest(`/product/one/${id}`, "GET"), // Ensure makeRequest is passed as a function
+    queryFn: () => makeRequest(`/product/one/${id}`, "GET",null, {
+      headers: {
+        Authorization: userInfo?.user?.token ? `Bearer ${userInfo.user.token}` : "",
+      },
+    }), // Ensure makeRequest is passed as a function
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,

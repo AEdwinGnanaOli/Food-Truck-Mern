@@ -1,101 +1,91 @@
 import React, { useEffect, useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { makeRequest } from "../../services/apiServices";
 import { useSelector } from "react-redux";
 import ProductCard from "../../components/cards/ProductCard";
-import { toast } from "react-hot-toast"; // Optional for user feedback
+import { toast } from "react-hot-toast";
+import useProductCrud from "../../hooks/products/useProductCrud";
+import { motion } from "framer-motion";  // Import Framer Motion
 
-function Home({ colors }) {
-  const { userInfo, isLoggedIn } = useSelector((state) => state.user);
+function Home() {
+  const { useFetchProducts } = useProductCrud();
+  const { userInfo } = useSelector((state) => state.user);
   const userId = userInfo?.user?.id;
   const queryClient = useQueryClient();
 
-  const {
-    data: items = [],
-    isLoading,
-    isError,
-    error
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: () => makeRequest("/product/all", "GET"),
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    select: (data) => data.data
-  });
+  // Fetch products
+  const { data: products = [], isLoading, isError, error } = useFetchProducts({});
 
-  const { mutate } = useMutation({
+  // Ensure products is always an array
+  const safeProducts = Array.isArray(products) ? products : [];
+
+  // Like mutation
+  const likeMutation = useMutation({
     mutationFn: (id) => makeRequest(`/product/like/${id}`, "PUT", { userId }),
     onMutate: async (id) => {
       await queryClient.cancelQueries(["products"]);
+
+      // Optimistic update
       const previousProducts = queryClient.getQueryData(["products"]);
-      queryClient.setQueryData(["products"], (old) => {
-        if (!Array.isArray(old)) return old;
-        return old.map((item) =>
-          item._id === id
-            ? {
-                ...item,
-                usersLiked: item.usersLiked.includes(userId)
-                  ? item.usersLiked.filter((user) => user !== userId)
-                  : [...item.usersLiked, userId],
-                likes: item.usersLiked.includes(userId)
-                  ? item.likes - 1
-                  : item.likes + 1
-              }
-            : item
-        );
-      });
+      queryClient.setQueryData(["products"], (old) =>
+        Array.isArray(old)
+          ? old.map((product) =>
+              product._id === id
+                ? {
+                    ...product,
+                    usersLiked: product.usersLiked.includes(userId)
+                      ? product.usersLiked.filter((user) => user !== userId)
+                      : [...product.usersLiked, userId],
+                    likes: product.usersLiked.includes(userId)
+                      ? product.likes - 1
+                      : product.likes + 1,
+                  }
+                : product
+            )
+          : old
+      );
       return { previousProducts };
     },
-    onError: (error, id, context) => {
+    onError: (_, __, context) => {
       toast.error("Failed to like the product.");
-      queryClient.setQueryData(["products"], context.previousProducts);
+      if (context?.previousProducts) {
+        queryClient.setQueryData(["products"], context.previousProducts);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries(["products"]);
-    }
+    },
   });
-  useEffect(() => {
-    AOS.init();
-  }, []);
-  const handleLike = (id) => {
 
-    mutate(id, {
-      onError: (err) => console.error("Mutation failed:", err),
-      onSuccess: (data) => toast.success("Product liked successfully")
+  // Handle like button click
+  const handleLike = (id) => {
+    likeMutation.mutate(id, {
+      onSuccess: () => toast.success("Product liked successfully."),
     });
   };
+
+  // Rendered product cards
   const renderedItems = useMemo(
     () =>
-      items.map((product) => (
-        <ProductCard
+      safeProducts.map((product) => (
+        <motion.div
           key={product._id}
-          product={product}
-          userId={userId}
-          onLike={handleLike}
-        />
+          initial={{ opacity: 0, y: 50 }} // Initial state for the animation
+          animate={{ opacity: 1, y: 0 }}  // Animation state when visible
+          exit={{ opacity: 0, y: -50 }}   // Exit animation when removed
+          transition={{ duration: 0.5 }}   // Duration of the animation
+        >
+          <ProductCard
+            product={product}
+            userId={userId}
+            onLike={handleLike}
+          />
+        </motion.div>
       )),
-    [items, userId, mutate]
+    [safeProducts, userId]
   );
-  // const renderedProfile = useMemo(() => {
-  //   if (!item) return null;
-  //   const dataArray = Array.isArray(item) ? item : [item];
-  //   return dataArray.map((data) => (
-  //     <Profile
-  //       open={isOpen}
-  //       close={closeDialog}
-  //       update={"none"}
-  //       deleted={"none"}
-  //       id={data._id}
-  //       name={data.name}
-  //       phone={data.phone}
-  //       email={data.email}
-  //     />
-  //   ));
-  // }, [item, openDialog, isOpen]);
 
+  // Loading and error states
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error: {error.message}</div>;
 

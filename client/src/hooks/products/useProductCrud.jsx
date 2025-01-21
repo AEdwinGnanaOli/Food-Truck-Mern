@@ -4,42 +4,54 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-
 function useProductCrud() {
-  const { user, isLoggedIn } = useSelector((state) => state.user);
+  const {userInfo, isLoggedIn } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Fetch single product or all products for a vendor
-  const useFetchProducts = ({vendorId = null, productId = null }) => {
+  // Fetch products (single product, vendor-specific, or all)
+  const useFetchProducts = ({ vendorId = null, productId = null } = {}) => {
+    // Determine the appropriate endpoint based on input parameters
     const endpoint = productId
       ? `/product/one/${productId}`
       : vendorId
       ? `/product/vendor/${vendorId}`
-      : "/product";
+      : `/product/all`;
 
     return useQuery({
-      queryKey: ["products", vendorId, productId].filter(Boolean),
-      queryFn: () => makeRequest(endpoint, "GET"),
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 10 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      select: (data) => (productId ? data : data?.products || []),
-      enabled: Boolean(vendorId || productId)
+      queryKey: ["products", { vendorId, productId }], // Include an object for clarity in query keys
+      queryFn: () => makeRequest(endpoint, "GET", null, {
+        headers: {
+          Authorization: userInfo?.user?.token ? `Bearer ${userInfo.user.token}` : "",
+        },
+      }),
+      staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
+      cacheTime: 10 * 60 * 1000, // Keep cached data for 10 minutes
+      refetchOnWindowFocus: false, // Prevent refetching on window focus
+      select: (data) => {
+        // Safeguard to ensure valid data
+        if (productId) {
+          return data || null; // Return single product or null
+        }
+        return Array.isArray(data?.products) ? data.products : []; // Return an array of products or fallback to an empty array
+      },
+      enabled: Boolean(productId || vendorId || endpoint === "/product/all") // Ensure query runs only if valid parameters are provided
     });
   };
 
   // Update product
-  const updateMutation = useMutation({
+  const updateProduct = useMutation({
     mutationFn: ({ productId, updateData }) =>
       makeRequest(`/product/update/${productId}`, "PUT", updateData),
     onMutate: async ({ productId, updateData }) => {
       await queryClient.cancelQueries(["products", productId]);
-      const previousData = queryClient.getQueryData(["products", productId]);
 
-      queryClient.setQueryData(["products", productId], (oldData) =>
-        oldData ? { ...oldData, ...updateData } : oldData
-      );
+      // Optimistic update
+      const previousData = queryClient.getQueryData(["products", productId]);
+      queryClient.setQueryData(["products", productId], (oldData) => ({
+        ...oldData,
+        ...updateData
+      }));
 
       return { previousData };
     },
@@ -50,26 +62,22 @@ function useProductCrud() {
           context.previousData
         );
       }
-      toast.error("Update failed. Please try again.");
+      toast.error("Failed to update product. Please try again.");
     },
     onSuccess: () => {
       toast.success("Product updated successfully.");
-      const redirectPath = isLoggedIn
-        ? user?.role === "admin"
-          ? "/admin"
-          : "/user"
-        : "/login";
-      navigate(redirectPath);
+      navigate(
+        isLoggedIn ? (user?.role === "admin" ? "/admin" : "/user") : "/login"
+      );
     },
-    onSettled: ({ productId }) => {
-      queryClient.invalidateQueries(["product", productId]);
+    onSettled: (_, __, { productId }) => {
+      queryClient.invalidateQueries(["products", productId]);
     }
   });
 
-
   return {
     useFetchProducts,
-    updateProduct: updateMutation.mutate,
+    updateProduct: updateProduct.mutate
   };
 }
 

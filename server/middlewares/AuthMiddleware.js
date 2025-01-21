@@ -2,12 +2,22 @@ import jwt from "jsonwebtoken";
 import { verifyToken } from "../utils/secretToken.js";
 
 const authenticate = (req, res, next) => {
-  const { token } = req.cookies; // Extract the token from cookies
 
-  // Check if the token exists
-  if (!token) {
-    return res.status(401).json({ status: false, message: "Authentication token is missing" });
-  }
+    const cookieHeader = req.headers.cookie; // Extract the Cookie header
+
+    // Check if the Cookie header exists
+    if (!cookieHeader) {
+      return res.status(401).json({
+        status: false,
+        message: "Authentication token is missing",
+      });
+    }// Parse the token from the Cookie header
+    const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
+      const [key, value] = cookie.trim().split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
+    const token = cookies.token; // Replace 'token' with the key of your cookie
 
   // Verify the token
   const decode = verifyToken(token);

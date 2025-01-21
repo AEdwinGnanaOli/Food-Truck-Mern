@@ -28,6 +28,7 @@
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.1",
     "chartjs-adapter-moment": "^1.0.1",
+    "framer-motion": "^11.18.2",
     "helmet": "^8.0.0",
     "moment": "^2.29.4",
     "primeicons": "^7.0.0",

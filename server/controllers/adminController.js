@@ -91,7 +91,7 @@ const getAllProducts = async (req, res) => {
         res.status(200).json({
             status: "success",
             message: "Products retrieved successfully",
-            data: products,
+          products,
         });
     } catch (err) {
         console.error("Error retrieving products:", err.message);

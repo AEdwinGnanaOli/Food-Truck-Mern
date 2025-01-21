@@ -10,9 +10,9 @@ function Button({ className, onClick, icon }) {
 }
 
 Button.propTypes = {
-  type: PropTypes.string.isRequired,
+  type: PropTypes.string,
   event: PropTypes.func,
-  label: PropTypes.string.isRequired
+  label: PropTypes.string
 };
 
 export default Button;

@@ -55,10 +55,10 @@ const login = async (req, res) => {
 
         // Set secure cookie for the token
         res.cookie("token", token, {
-            httpOnly: true,
-            secure: false, // Secure only in production
-            sameSite: "lax", // Prevent CSRF attacks
-            maxAge: 30 * 24 * 60 * 60 * 1000
+            httpOnly: true,       // Prevents access via JavaScript
+            secure: false,        // Should be true in production (HTTPS)
+            sameSite: "lax",      // Prevents CSRF attacks
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         });
 
         // Respond with success

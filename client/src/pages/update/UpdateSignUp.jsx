@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import useForms from "../../hooks/useForms";
-import usePutData from "../../hooks/update/useUserData";
+import usePutData from "../../hooks/update/useUserCrud";
 
 function UpdateSignUp() {
   const {
@@ -34,8 +34,6 @@ function UpdateSignUp() {
   }, [userData]);
 
   const onSubmit = () => {
-     
-  
     updateUser({ id, updateData: formData });
   };
 
