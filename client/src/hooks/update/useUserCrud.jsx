@@ -13,14 +13,14 @@ const useUserCrud = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const {
-    userInfo: { user },
+    userInfo ,
     isLoggedIn,
   } = useSelector((state) => state.user);
-
+console.log(userInfo)
   // Navigate based on user role
   const redirectUser = () => {
     if (!isLoggedIn) return navigate("/login");
-    const path = user?.role === "admin" ? "/admin" : "/user";
+    const path = userInfo.user?.role === "admin" ? "/admin" : "/user";
     navigate(path);
   };
 
@@ -29,11 +29,7 @@ const useUserCrud = () => {
     
     return useQuery({
       queryKey: userId ? QUERY_KEYS.USER(userId) : [QUERY_KEYS.USERS],
-      queryFn: () => makeRequest(userId ? `/user/${userId}` : `/users`, "GET", null, {
-        headers: {
-          Authorization: user?.token ? `Bearer ${user.token}` : "",
-        },
-      }),
+      queryFn: () => makeRequest(userId ? `/user/${userId}` : `/admin/all/users`, "GET", null,{}, userInfo?.token ? userInfo.token : ""),
       staleTime: 5 * 60 * 1000, // 5 minutes
       cacheTime: 10 * 60 * 1000, // 10 minutes
       enabled: userId !== undefined, // Ensure fetching only when needed
@@ -44,11 +40,7 @@ const useUserCrud = () => {
 
   // Update user mutation
   const updateUser = useMutation({
-    mutationFn: ({ id, updateData }) => makeRequest(`/user/update/${id}`, "PUT", updateData, {
-      headers: {
-        Authorization: user?.token ? `Bearer ${user.token}` : "",
-      },
-    }),
+    mutationFn: ({ id, updateData }) => makeRequest(`/user/update/${id}`, "PUT", updateData,{}, userInfo?.token ? userInfo.token : "",),
     onMutate: async ({ id, updateData }) => {
       await queryClient.cancelQueries(QUERY_KEYS.USER(id));
 
@@ -78,16 +70,12 @@ const useUserCrud = () => {
 
   // Delete user mutation
   const deleteUser = useMutation({
-    mutationFn: (id) => makeRequest(`/user/delete/${id}`, "DELETE", null, {
-      headers: {
-        Authorization: user?.token ? `Bearer ${user.token}` : "",
-      },
-    }),
+    mutationFn: (id) => makeRequest(`/user/delete/${id}`, "DELETE", null,{},  userInfo?.token ? userInfo.token : "",),
     onSuccess: () => {
       toast.success("User deleted successfully.");
       queryClient.invalidateQueries([QUERY_KEYS.USERS]);
 
-      if (user?.role === "user" || user?.role === "vendor") {
+      if (userInfo.user?.role === "user" || userInfo.user?.role === "vendor") {
         localStorage.removeItem("userInfo");
       }
       navigate("/");

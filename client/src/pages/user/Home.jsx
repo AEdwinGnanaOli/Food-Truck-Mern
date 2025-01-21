@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import ProductCard from "../../components/cards/ProductCard";
 import { toast } from "react-hot-toast";
 import useProductCrud from "../../hooks/products/useProductCrud";
-import { motion } from "framer-motion";  // Import Framer Motion
+import { motion } from "framer-motion"; // Import Framer Motion
 
 function Home() {
   const { useFetchProducts } = useProductCrud();
@@ -14,14 +14,27 @@ function Home() {
   const queryClient = useQueryClient();
 
   // Fetch products
-  const { data: products = [], isLoading, isError, error } = useFetchProducts({});
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    error
+  } = useFetchProducts({});
 
   // Ensure products is always an array
   const safeProducts = Array.isArray(products) ? products : [];
 
   // Like mutation
   const likeMutation = useMutation({
-    mutationFn: (id) => makeRequest(`/product/like/${id}`, "PUT", { userId }),
+    mutationFn: (id) =>
+      makeRequest(
+        `/product/like/${id}`,
+        "PUT",
+        { userId },
+
+        {},
+        userInfo?.token ? userInfo.token : ""
+      ),
     onMutate: async (id) => {
       await queryClient.cancelQueries(["products"]);
 
@@ -38,7 +51,7 @@ function Home() {
                       : [...product.usersLiked, userId],
                     likes: product.usersLiked.includes(userId)
                       ? product.likes - 1
-                      : product.likes + 1,
+                      : product.likes + 1
                   }
                 : product
             )
@@ -54,13 +67,13 @@ function Home() {
     },
     onSettled: () => {
       queryClient.invalidateQueries(["products"]);
-    },
+    }
   });
 
   // Handle like button click
   const handleLike = (id) => {
     likeMutation.mutate(id, {
-      onSuccess: () => toast.success("Product liked successfully."),
+      onSuccess: () => toast.success("Product liked successfully.")
     });
   };
 
@@ -71,15 +84,11 @@ function Home() {
         <motion.div
           key={product._id}
           initial={{ opacity: 0, y: 50 }} // Initial state for the animation
-          animate={{ opacity: 1, y: 0 }}  // Animation state when visible
-          exit={{ opacity: 0, y: -50 }}   // Exit animation when removed
-          transition={{ duration: 0.5 }}   // Duration of the animation
+          animate={{ opacity: 1, y: 0 }} // Animation state when visible
+          exit={{ opacity: 0, y: -50 }} // Exit animation when removed
+          transition={{ duration: 0.5 }} // Duration of the animation
         >
-          <ProductCard
-            product={product}
-            userId={userId}
-            onLike={handleLike}
-          />
+          <ProductCard product={product} userId={userId} onLike={handleLike} />
         </motion.div>
       )),
     [safeProducts, userId]

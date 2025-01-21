@@ -6,19 +6,27 @@ import { useSelector } from "react-redux";
 
 function More() {
   const { id } = useParams();
-const {userInfo} =useSelector((state)=>state.user)
+  const { userInfo } = useSelector((state) => state.user);
   // Fetch product details using React Query
-  const { data: product, isLoading, isError, error } = useQuery({
+  const {
+    data: product,
+    isLoading,
+    isError,
+    error
+  } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => makeRequest(`/product/one/${id}`, "GET",null, {
-      headers: {
-        Authorization: userInfo?.user?.token ? `Bearer ${userInfo.user.token}` : "",
-      },
-    }), // Ensure makeRequest is passed as a function
+    queryFn: () =>
+      makeRequest(
+        `/product/one/${id}`,
+        "GET",
+        null,
+        {},
+        userInfo?.token ? userInfo.token : ""
+      ), // Ensure makeRequest is passed as a function
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
-    select: (data) => data?.data, // Safely select the `data` field
+    select: (data) => data?.data // Safely select the `data` field
   });
 
   // Memoize the rendered item for performance
@@ -49,23 +57,27 @@ const {userInfo} =useSelector((state)=>state.user)
             </h2>
             <div className="mt-2 text-gray-600 space-y-2 text-justify sm:text-start">
               <p>
-                <span className="font-semibold">Shop Address:</span> 
+                <span className="font-semibold">Shop Address:</span>
                 <span>{product.address.location},</span>
                 <span>{product.address.city},</span>
                 <span>{product.address.state},</span>
                 <span>{product.address.zip}.</span>
               </p>
               <p>
-                <span className="font-semibold">Contact Us:</span> {product.phone}
+                <span className="font-semibold">Contact Us:</span>{" "}
+                {product.phone}
               </p>
               <p>
-                <span className="font-semibold">Start Time:</span> {product.startTime}
+                <span className="font-semibold">Start Time:</span>{" "}
+                {product.startTime}
               </p>
               <p>
-                <span className="font-semibold">Ending Time:</span> {product.endTime}
+                <span className="font-semibold">Ending Time:</span>{" "}
+                {product.endTime}
               </p>
               <p>
-                <span className="font-semibold">Description:</span> {product.description}
+                <span className="font-semibold">Description:</span>{" "}
+                {product.description}
               </p>
             </div>
           </div>

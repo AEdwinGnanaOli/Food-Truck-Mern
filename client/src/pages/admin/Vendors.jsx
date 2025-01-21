@@ -14,21 +14,28 @@ export default function Vendors() {
   const TABLE_HEAD = ["Name", "Phone", "Email", "Action"];
 
   const { isOpen, openDialog, closeDialog } = useDialog();
-
+  const { userInfo } = useSelector((state) => state.user);
   const {
     data: users = [],
     isLoading,
-    isError,
+    isError
   } = useQuery({
     queryKey: ["users"],
-    queryFn: () => makeRequest("/admin/all/users", "GET"),
+    queryFn: () =>
+      makeRequest(
+        "/admin/all/users",
+        "GET",
+        null,
+        {},
+        userInfo?.token ? userInfo.token : ""
+      ),
     onSuccess: () => {
       toast.success("All Users Received Successfully");
     },
     onError: (error) => {
       toast.error(error.message || "An error occurred");
     },
-    select: (data) => data.users.filter((user)=>user.role.includes("vendor")),
+    select: (data) => data.users.filter((user) => user.role.includes("vendor"))
   });
 
   const renderedTableRows = useMemo(() => {
@@ -129,7 +136,6 @@ export default function Vendors() {
     </div>
   );
 }
-
 
 // import React, { useState, useEffect } from 'react';
 // import { FilterMatchMode, FilterOperator } from 'primereact/api';

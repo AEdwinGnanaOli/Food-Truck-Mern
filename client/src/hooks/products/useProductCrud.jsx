@@ -17,14 +17,9 @@ function useProductCrud() {
       : vendorId
       ? `/product/vendor/${vendorId}`
       : `/product/all`;
-
     return useQuery({
       queryKey: ["products", { vendorId, productId }], // Include an object for clarity in query keys
-      queryFn: () => makeRequest(endpoint, "GET", null, {
-        headers: {
-          Authorization: userInfo?.user?.token ? `Bearer ${userInfo.user.token}` : "",
-        },
-      }),
+      queryFn: () => makeRequest(endpoint, "GET", null,{}, userInfo?.token ? userInfo.token : "",),
       staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
       cacheTime: 10 * 60 * 1000, // Keep cached data for 10 minutes
       refetchOnWindowFocus: false, // Prevent refetching on window focus
@@ -42,7 +37,7 @@ function useProductCrud() {
   // Update product
   const updateProduct = useMutation({
     mutationFn: ({ productId, updateData }) =>
-      makeRequest(`/product/update/${productId}`, "PUT", updateData),
+      makeRequest(`/product/update/${productId}`, "PUT", updateData,{}, userInfo?.token ? userInfo.token : "",),
     onMutate: async ({ productId, updateData }) => {
       await queryClient.cancelQueries(["products", productId]);
 

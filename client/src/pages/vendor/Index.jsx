@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
-import { makeRequest } from "../../services/apiServices";
-import { toast } from "react-hot-toast";
+
 import { Card, Typography } from "@material-tailwind/react";
 import useDialog from "../../hooks/useDialog";
 import Delete from "../../components/Delete";
-import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
-import CreateIcon from "@mui/icons-material/Create";
+
 import { useNavigate } from "react-router-dom";
 // import useProductQuery from "../../hooks/products/useProductQuery";
 import ProductTableCard from "../../components/cards/ProductTableCard";
@@ -14,9 +12,7 @@ import { useSelector } from "react-redux";
 import useProductCrud from "../../hooks/products/useProductCrud";
 
 export default function Index() {
-  const {
-    userInfo: { user }
-  } = useSelector((state) => state.user) || { userInfo: { user: {} } };
+  const { userInfo } = useSelector((state) => state.user) || { userInfo };
   const { useFetchAllProducts } = useProductCrud();
   const navigate = useNavigate();
 

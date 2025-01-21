@@ -8,17 +8,29 @@ import useDialog from "../../hooks/useDialog";
 import Delete from "../../components/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import CreateIcon from "@mui/icons-material/Create";
+import { useSelector } from "react-redux";
 
 export default function Users() {
   const navigate = useNavigate();
   const { isOpen, openDialog, closeDialog } = useDialog();
-
-  const { data: users = [], isLoading, isError } = useQuery({
+  const { userInfo } = useSelector((state) => state.user);
+  const {
+    data: users = [],
+    isLoading,
+    isError
+  } = useQuery({
     queryKey: ["users"],
-    queryFn: () => makeRequest("/admin/all/users", "GET"),
+    queryFn: () =>
+      makeRequest(
+        "/admin/all/users",
+        "GET",
+        null,
+        {},
+        userInfo?.token ? userInfo.token : ""
+      ),
     onSuccess: () => toast.success("Users fetched successfully."),
     onError: (error) => toast.error(error.message || "Error fetching users."),
-    select: (data) => data.users.filter((user) => user.role.includes("user")),
+    select: (data) => data.users.filter((user) => user.role.includes("user"))
   });
 
   const handleNavigate = useCallback(
@@ -84,7 +96,9 @@ export default function Users() {
   return (
     <div className="p-4">
       {isLoading && <div className="text-center mt-10">Loading...</div>}
-      {isError && <div className="text-center mt-10">Failed to load users.</div>}
+      {isError && (
+        <div className="text-center mt-10">Failed to load users.</div>
+      )}
       {!isLoading && !isError && (
         <>
           <div className="flex justify-end mb-4">

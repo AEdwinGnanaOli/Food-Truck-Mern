@@ -3,21 +3,10 @@ import { verifyToken } from "../utils/secretToken.js";
 
 const authenticate = (req, res, next) => {
 
-    const cookieHeader = req.headers.cookie; // Extract the Cookie header
-
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+console.log(token,"newwwwwwwwwwwww");
     // Check if the Cookie header exists
-    if (!cookieHeader) {
-      return res.status(401).json({
-        status: false,
-        message: "Authentication token is missing",
-      });
-    }// Parse the token from the Cookie header
-    const cookies = cookieHeader.split(";").reduce((acc, cookie) => {
-      const [key, value] = cookie.trim().split("=");
-      acc[key] = value;
-      return acc;
-    }, {});
-    const token = cookies.token; // Replace 'token' with the key of your cookie
+    // Replace 'token' with the key of your cookie
 
   // Verify the token
   const decode = verifyToken(token);
