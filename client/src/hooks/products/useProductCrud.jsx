@@ -24,8 +24,10 @@ function useProductCrud() {
       cacheTime: 10 * 60 * 1000, // Keep cached data for 10 minutes
       refetchOnWindowFocus: false, // Prevent refetching on window focus
       select: (data) => {
+        console.log(data);
         // Safeguard to ensure valid data
         if (productId) {
+
           return data || null; // Return single product or null
         }
         return Array.isArray(data?.products) ? data.products : []; // Return an array of products or fallback to an empty array

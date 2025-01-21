@@ -8,6 +8,7 @@ import Delete from "../../components/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import CreateIcon from "@mui/icons-material/Create";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function Vendors() {
   const navigate = useNavigate();

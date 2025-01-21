@@ -1,11 +1,8 @@
-
-import React, { useMemo } from "react";
-
+import React from "react";
 import { Card, Typography } from "@material-tailwind/react";
 import useDialog from "../../hooks/useDialog";
-
 import { useNavigate } from "react-router-dom";
-import useProductQuery from "../../hooks/products/useProductQuery";
+import useProductCrud from "../../hooks/products/useProductCrud";
 import ProductTableCard from "../../components/cards/ProductTableCard";
 
 export default function Products() {
@@ -24,19 +21,20 @@ export default function Products() {
   ];
   const { isOpen, openDialog, closeDialog } = useDialog();
 
-  const { data: products = [], isLoading, isError, error } = useProductQuery();
+  const { useFetchProducts } = useProductCrud();
+  const { data, isLoading, isError } = useFetchProducts({});
 
-  const renderedTableRows = useMemo(() => {
-    if (products.length === 0) {
-      return (
-        <tr>
-          <td colSpan={10} className="text-center p-4">
-            No users available.
-          </td>
-        </tr>
-      );
-    }
-    return products.map((product) => {
+  // Handle loading and error states
+  if (isLoading) {
+    return <div className="text-center mt-10">Loading...</div>;
+  }
+  if (isError) {
+    return <div className="text-center mt-10">Failed to load products.</div>;
+  }
+
+  // Render table rows directly
+  const renderedTableRows = data?.length ? (
+    data.map((product) => {
       const {
         _id,
         shopImage,
@@ -51,7 +49,7 @@ export default function Products() {
       } = product;
 
       return (
-        <>
+        <tr key={_id}>
           <ProductTableCard
             id={_id}
             shopImage={shopImage}
@@ -63,21 +61,21 @@ export default function Products() {
             price={price}
             startTime={startTime}
             endTime={endTime}
-            // event={deleteProduct}
             openDialog={openDialog}
             isOpen={isOpen}
             closeDialog={closeDialog}
           />
-        </>
+        </tr>
       );
-    });
-  }, [products, navigate, openDialog, closeDialog, isOpen]);
-  if (isLoading) {
-    return <div className="text-center mt-10">Loading...</div>;
-  }
-  if (isError) {
-    return <div className="text-center mt-10">Failed to load users.</div>;
-  }
+    })
+  ) : (
+    <tr>
+      <td colSpan={10} className="text-center p-4">
+        No products available.
+      </td>
+    </tr>
+  );
+
   return (
     <div className="p-4">
       <div className="flex justify-end mb-4">

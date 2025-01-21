@@ -13,7 +13,7 @@ import useProductCrud from "../../hooks/products/useProductCrud";
 
 export default function Index() {
   const { userInfo } = useSelector((state) => state.user) || { userInfo };
-  const { useFetchAllProducts } = useProductCrud();
+  const { useFetchProducts } = useProductCrud();
   const navigate = useNavigate();
 
   const TABLE_HEAD = [
@@ -30,7 +30,7 @@ export default function Index() {
   ];
 
   const { isOpen, openDialog, closeDialog } = useDialog();
-  const { data: products, isLoading, isError } = useFetchAllProducts(user?.id);
+  const { data: products, isLoading, isError } = useFetchProducts(user?.id);
 
   const renderedTableRows = useMemo(() => {
     if (!products || products.length === 0) {
