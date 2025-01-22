@@ -1,35 +1,25 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import useLogout from "../../hooks/useLogout";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import useDialog from "../../hooks/useDialog";
 import Profile from "../dialog/Profile";
-
+import { motion, AnimatePresence } from "framer-motion";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 const NAVIGATION_LINKS = [
   { name: "Home", href: "/" },
   { name: "Contact", href: "/contact" },
   { name: "About", href: "/about" }
 ];
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { userInfo, isLoggedIn } = useSelector((state) => state.user);
   const { isOpen, closeDialog, openDialog } = useDialog();
-
   const logout = useLogout();
-  useEffect(() => {
-    AOS.init({
-      duration: 800,
-      easing: "ease-in-out",
-      offset: 50,
-      once: true
-    });
-  }, []);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
@@ -43,14 +33,17 @@ const Header = () => {
             : "/user"
           : href
     }));
-  }, [isLoggedIn]);
+  }, [isLoggedIn, userInfo]);
 
   return (
-    <header
-      className=" header relative z-50 flex flex-wrap sm:justify-start sm:flex-nowrap w-full backdrop-blur-lg text-sm py-3 dark:from-gray-800 dark:via-gry-700 dark:to-gray-600"
-      data-aos="fade-down"
+    <motion.header
+      className="header relative z-50 flex flex-wrap lg:flex-nowrap w-full backdrop-blur-lg
+ text-sm py-3"
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
     >
-      <nav className="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between relative">
+      <nav className="max-w-[85rem] w-full mx-auto px-4 lg:flex lg:items-center lg:justify-between relative">
         {/* Logo and Brand */}
         <div className="flex items-center justify-between">
           <a
@@ -69,93 +62,158 @@ const Header = () => {
           </a>
 
           {/* Hamburger Menu Button */}
-          <div className="sm:hidden">
-            <button
-              type="button"
-              className="flex justify-center items-center rounded-lg border bg-white text-gray-800 shadow-sm dark:bg-transparent dark:border-gray-600 dark:text-white"
-              aria-expanded={isMenuOpen}
-              onClick={toggleMenu}
+          <button
+            type="button"
+            className="lg:hidden flex items-center justify-center"
+            aria-expanded={isMenuOpen}
+            onClick={toggleMenu}
+          >
+            <motion.div
+              key={isMenuOpen ? "close" : "open"}
+              initial={{ rotate: 0, scale: 1 }}
+              animate={
+                isMenuOpen
+                  ? { rotate: 180, scale: 1.2 }
+                  : { rotate: 0, scale: 1 }
+              }
+              transition={{ duration: 0.3 }}
             >
               {isMenuOpen ? (
-                <HiX className="block w-6 h-6" />
+                <HiX className="block w-6 h-6 text-white" />
               ) : (
-                <HiMenuAlt3 className="block w-6 h-6" />
+                <HiMenuAlt3 className="block w-6 h-6 text-white" />
               )}
-            </button>
-          </div>
+            </motion.div>
+          </button>
         </div>
 
         {/* Navigation Links */}
-        <div
-          id="navbar-menu"
-          className={`hs-collapse overflow-hidden transition-all duration-300 sm:block ${
-            isMenuOpen ? "block" : "hidden"
-          }`}
-        >
-          <div
-            className="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:mt-0"
-            data-aos="fade-up"
+        <AnimatePresence>
+          <motion.div
+            id="navbar-menu"
+            className={`hs-collapse ${
+              isMenuOpen ? "block" : "hidden"
+            } lg:flex lg:items-center`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            {navLinks.map(({ name, href }) => (
-              <Link
-                key={name}
-                to={href}
-                onClick={() => setIsMenuOpen(false)}
-                className={`font-medium px-3 py-2 rounded-lg ${
-                  location.pathname === href
-                    ? "text-white border-b-2 border-red-600 bg-gray-700"
-                    : "text-gray-200 hover:text-white dark:text-gray-400 dark:hover:text-white"
-                }`}
-              >
-                {name}
-              </Link>
-            ))}
+            <motion.div
+              className="flex flex-col lg:flex-row lg:items-center gap-5 mt-5 lg:mt-0"
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={{
+                hidden: { opacity: 0, y: -10 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { staggerChildren: 0.1 }
+                }
+              }}
+            >
+              {navLinks.map(({ name, href }) => (
+                <motion.div
+                  key={name}
+                  variants={{
+                    hidden: { opacity: 0, y: -10 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                >
+                  <Link
+                    to={href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`font-medium px-3 py-2 rounded-lg ${
+                      location.pathname === href
+                        ? "text-white border-b-2 border-red-600 bg-gray-700"
+                        : "text-gray-200 hover:text-white dark:text-white dark:hover:text-gray-500"
+                    }`}
+                  >
+                    {name}
+                  </Link>
+                </motion.div>
+              ))}
 
-            {isLoggedIn ? (
-              <div
-                className="font-medium px-[3px] py-[2px] rounded-full bg-green-600 text-white hover:bg-green-700 dark:bg-gray-700 dark:hover:bg-gray-600 "
-                onClick={openDialog}
-              >
-                <AccountCircleIcon />
-              </div>
-            ) : (
-              <>
-                <button
-                  className="font-medium px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 dark:bg-gray-700 dark:hover:bg-gray-600"
-                  onClick={() => {
-                    navigate("/sign-up");
-                    setIsMenuOpen(false);
+              {isLoggedIn ? (
+                <motion.div
+                  className="font-medium px-[3px] py-[2px] rounded-full bg-green-600 text-white hover:bg-green-700 dark:bg-gray-700 dark:hover:bg-gray-600"
+                  onClick={openDialog}
+                  variants={{
+                    hidden: { opacity: 0, y: -10 },
+                    visible: { opacity: 1, y: 0 }
                   }}
-                  data-aos="zoom-in"
                 >
-                  Sign Up
-                </button>
-                <button
-                  className="font-medium px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 dark:bg-gray-700 dark:hover:bg-gray-600"
-                  onClick={() => {
-                    navigate("/sign-in"), setIsMenuOpen(false);
-                  }}
-                  data-aos="zoom-in"
-                >
-                  Sign In
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>{" "}
-      {/* Parent container */}
-      {isLoggedIn && (
-        <div className="">
-          <Profile
-            open={isOpen}
-            close={closeDialog}
-            update={""}
-            logout={logout}
-          />
-        </div>
-      )}
-    </header>
+                  <AccountCircleIcon />
+                </motion.div>
+              ) : (
+                <>
+                  <motion.button
+                    className="font-medium px-4 py-2 rounded-lg text-white shadow-lg hover:shadow-xl border-b-2 border-red-600 bg-gray-700 hover:bg-gray-600"
+                    onClick={() => {
+                      navigate("/sign-up");
+                      setIsMenuOpen(false);
+                    }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{
+                      scale: 1.1,
+                      boxShadow: "0px 0px 15px rgba(220, 38, 38, 0.8)" // Red glow effect
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 20,
+                      duration: 0.5
+                    }}
+                  >
+                    Sign Up
+                  </motion.button>
+
+                  <motion.button
+                    className="font-medium px-4 py-2 rounded-lg text-white shadow-lg hover:shadow-xl border-b-2 border-red-600 bg-gray-700 hover:bg-gray-600"
+                    onClick={() => {
+                      navigate("/sign-in");
+                      setIsMenuOpen(false);
+                    }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{
+                      scale: 1.1,
+                      boxShadow: "0px 0px 15px rgba(220, 38, 38, 0.8)" // Red glow effect
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 20,
+                      duration: 0.5
+                    }}
+                  >
+                    Sign In
+                  </motion.button>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      </nav>
+    
+     {/* Profile Dialog */}
+     <AnimatePresence>
+        {isLoggedIn && isOpen && (
+          <motion.div
+            className=""
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Profile open={isOpen} close={closeDialog} logout={logout} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    
+    </motion.header>
   );
 };
 

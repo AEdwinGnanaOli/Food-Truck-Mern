@@ -34,7 +34,7 @@ const createUser = async (req, res) => {
             password: hashedPassword
         });
 
-        res.status(201).json({
+        return res.status(201).json({
             message: "User created successfully",
             success: true,
             user: { id: newUser._id, name: newUser.name, email: newUser.email, phone: newUser.phone }
@@ -47,7 +47,7 @@ const createUser = async (req, res) => {
         }
 
         console.error(err);
-        res.status(500).json({ message: "Internal server error", success: false, error: err.message });
+        return res.status(500).json({ message: "Internal server error", success: false, error: err.message });
     }
 };
 
@@ -59,7 +59,7 @@ const getUser = async (req, res) => {
         if (user) res.json(user);
         else res.status(404).json({ message: 'User not found' });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return  res.status(500).json({ message: err.message });
     }
 }
 
@@ -112,7 +112,7 @@ const deleteUser = async (req, res) => {
         // res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "strict" });
         return res.json({ message: 'Delete Successfully' });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ message: err.message });
     }
 }
 

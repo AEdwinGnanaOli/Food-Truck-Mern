@@ -10,14 +10,14 @@ const getOneVendorProducts = async (req, res) => {
     try {
         // Filter by user (vendor) ID instead of _id
         const products = await productModel.find({ user: id }).populate("user");
-        console.log(products)
+
         if (products.length === 0) {
             return res.status(404).json({ message: "No products found for this vendor" });
         }
-        res.status(200).json({ message: "Vendor's products retrieved successfully", products });
+        return res.status(200).json({ message: "Vendor's products retrieved successfully", products });
     } catch (err) {
         console.log(err.message)
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ message: err.message });
     }
 };
 
@@ -27,12 +27,12 @@ const getOneProduct = async (req, res) => {
     try {
         const product = await productModel.findById(id);
         if (product) {
-            res.status(200).json({ message: "Product found", data: product });
+            return res.status(200).json({ message: "Product found", data: product });
         } else {
-            res.status(404).json({ message: "Product not found" });
+            return res.status(404).json({ message: "Product not found" });
         }
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({ message: err.message });
     }
 };
 
@@ -51,8 +51,7 @@ const createProduct = async (req, res) => {
 
         description
     } = req.body;
-    console.log(req.body);
-    console.log(req.files)
+
 
 
     try {
@@ -75,21 +74,20 @@ const createProduct = async (req, res) => {
         });
 
         // Return success response
-        res.status(201).json({
+        return res.status(201).json({
             message: "Product created successfully",
             product,
         });
     } catch (err) {
         // Return error response
-        res.status(400).json({ message: `Error creating product: ${err.message}` });
+        return res.status(400).json({ message: `Error creating product: ${err.message}` });
     }
 };
 
 const productsLiked = async (req, res) => {
     const { id } = req.params; // Product ID
     const { userId } = req.body; // User ID
-    console.log(id);
-    console.log(userId);
+
 
     try {
         // Validate user ID
@@ -175,7 +173,7 @@ const updateProduct = async (req, res) => {
         );
 
         // Respond with success
-        res.status(200).json({
+        return res.status(200).json({
             message: "Product updated successfully",
             product: updatedProduct,
         });
@@ -192,18 +190,25 @@ const updateProduct = async (req, res) => {
 // Delete a product
 const deleteProduct = async (req, res) => {
     const { id } = req.params;
+
     try {
         const deletedProduct = await productModel.findByIdAndDelete(id);
 
-        if (deletedProduct) {
-            res.status(200).json({ message: "Product deleted successfully", product: deletedProduct });
-        } else {
-            res.status(404).json({ message: "Product not found" });
+        if (!deletedProduct) {
+            return res.status(404).json({ message: "Product not found" });
         }
-        res.status(200).json({ message: "Product deleted successfully", });
+
+        return res.status(200).json({
+            message: "Product deleted successfully",
+            product: deletedProduct
+        });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        return res.status(500).json({
+            message: "An error occurred while deleting the product",
+            error: err.message
+        });
     }
 };
+
 
 export { getOneProduct, createProduct, updateProduct, productsLiked, deleteProduct, getOneVendorProducts };

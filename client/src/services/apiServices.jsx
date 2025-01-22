@@ -7,9 +7,9 @@ const BASE_URLS = {
 };
 
 // Automatically pick the base URL based on the current environment
-// const BASE_URL =
-//   "production" === "production" ? BASE_URLS.production : BASE_URLS.development;
-const BASE_URL = BASE_URLS.production;
+const BASE_URL =
+  "production" === "production" ? BASE_URLS.production : BASE_URLS.development;
+// const BASE_URL = BASE_URLS.production;
 
 // Global Axios configuration
 axios.defaults.withCredentials = true; // Always include credentials (cookies) in requests
@@ -29,7 +29,7 @@ const makeRequest = async (
       ...config.headers,
       Authorization: token ? `Bearer ${token}` : ""
     };
-
+console.log(token)
     const response = await axios({
       url: endPoint,
       method,

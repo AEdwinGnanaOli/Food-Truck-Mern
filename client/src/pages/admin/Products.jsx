@@ -1,80 +1,61 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, Typography } from "@material-tailwind/react";
-import useDialog from "../../hooks/useDialog";
 import { useNavigate } from "react-router-dom";
+import useDialog from "../../hooks/useDialog";
 import useProductCrud from "../../hooks/products/useProductCrud";
 import ProductTableCard from "../../components/cards/ProductTableCard";
 
+const TABLE_HEAD = [
+  "ShopImage",
+  "MenuImage",
+  "ProductName",
+  "Phone",
+  "Address",
+  "Description",
+  "Price",
+  "StartTime",
+  "EndTime",
+  "Action",
+];
+
 export default function Products() {
   const navigate = useNavigate();
-  const TABLE_HEAD = [
-    "ShopImage",
-    "MenuImage",
-    "ProductName",
-    "Phone",
-    "Address",
-    "Description",
-    "Price",
-    "StartTime",
-    "EndTime",
-    "Action"
-  ];
   const { isOpen, openDialog, closeDialog } = useDialog();
-
   const { useFetchProducts } = useProductCrud();
-  const { data, isLoading, isError } = useFetchProducts({});
+  const { data: products = [], isLoading, isError } = useFetchProducts({});
 
-  // Handle loading and error states
-  if (isLoading) {
-    return <div className="text-center mt-10">Loading...</div>;
-  }
-  if (isError) {
-    return <div className="text-center mt-10">Failed to load products.</div>;
-  }
-
-  // Render table rows directly
-  const renderedTableRows = data?.length ? (
-    data.map((product) => {
-      const {
-        _id,
-        shopImage,
-        menuImage,
-        shopName,
-        phone,
-        address,
-        description,
-        price,
-        startTime,
-        endTime
-      } = product;
-
+  const renderedTableRows = useMemo(() => {
+    if (!products.length) {
       return (
-        <tr key={_id}>
-          <ProductTableCard
-            id={_id}
-            shopImage={shopImage}
-            menuImage={menuImage}
-            shopName={shopName}
-            phone={phone}
-            address={address}
-            description={description}
-            price={price}
-            startTime={startTime}
-            endTime={endTime}
-            openDialog={openDialog}
-            isOpen={isOpen}
-            closeDialog={closeDialog}
-          />
+        <tr>
+          <td colSpan={10} className="text-center p-4">
+            No products available.
+          </td>
         </tr>
       );
-    })
-  ) : (
-    <tr>
-      <td colSpan={10} className="text-center p-4">
-        No products available.
-      </td>
-    </tr>
-  );
+    }
+    return products.map((product) => (
+      <ProductTableCard
+        key={product._id}
+        id={product._id}
+        shopImage={product.shopImage}
+        menuImage={product.menuImage}
+        shopName={product.shopName}
+        phone={product.phone}
+        address={product.address}
+        description={product.description}
+        price={product.price}
+        startTime={product.startTime}
+        endTime={product.endTime}
+        openDialog={openDialog}
+        isOpen={isOpen}
+        closeDialog={closeDialog}
+      />
+    ));
+  }, [products, isOpen, openDialog, closeDialog]);
+
+  if (isLoading) return <div className="text-center mt-10">Loading...</div>;
+  if (isError) return <div className="text-center mt-10">Failed to load products.</div>;
 
   return (
     <div className="p-4">

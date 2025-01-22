@@ -19,7 +19,9 @@ export function RootLayout({ title }) {
   return (
     <div className="flex flex-col min-h-screen  z-0">
       {/* Header */}
-      <Header />
+     <div className="">
+     <Header />
+     </div>
 
       {/* Main Content */}
       <div className="relative flex flex-col flex-1 overflow-y-auto z-10">

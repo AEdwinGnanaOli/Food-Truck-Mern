@@ -4,9 +4,6 @@ import { verifyToken } from "../utils/secretToken.js";
 const authenticate = (req, res, next) => {
 
   const token = req.header("Authorization")?.replace("Bearer ", "");
-console.log(token,"newwwwwwwwwwwww");
-    // Check if the Cookie header exists
-    // Replace 'token' with the key of your cookie
 
   // Verify the token
   const decode = verifyToken(token);
@@ -22,7 +19,6 @@ console.log(token,"newwwwwwwwwwwww");
 const roleAuthentication = (roles = []) => async (req, res, next) => {
 
   const { user } = req;
-  // console.log(user)
   if (roles.includes(user.role)) {
 
     next();
